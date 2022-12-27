@@ -15,7 +15,8 @@
         android:theme="@style/Theme.MyApplication"
         tools:targetApi="22">
 
-        <service android:name=".ExampleService" />
+        <service android:name=".ExampleService"
+          />
 
         <receiver android:name=".Receiver">
 

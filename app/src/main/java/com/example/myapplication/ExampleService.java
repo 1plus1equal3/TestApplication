@@ -31,24 +31,28 @@ public class ExampleService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
         //Start MainActivity on click of notification
         Intent ActivityIntent = new Intent(this, MainActivity.class);
         ActivityIntent.setAction(Intent.ACTION_MAIN);
         ActivityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, ActivityIntent, PendingIntent.FLAG_ONE_SHOT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, ActivityIntent, PendingIntent.FLAG_IMMUTABLE);
         //Play/Pause song from notification Action Button
         Intent PPB_intent = new Intent(this, Receiver.class);
         PPB_intent.putExtra("Play/Pause", PLAY_PAUSE);
+        PPB_intent.setAction(PLAY_PAUSE);
         PendingIntent PPB_pendingIntent = PendingIntent.getBroadcast(this, 0, PPB_intent, PendingIntent.FLAG_IMMUTABLE);
 
         //Skip to previous song from notification Action Button
         Intent SPB_intent = new Intent(this, Receiver.class);
         SPB_intent.putExtra("SkipPrevious", SKIP_PREVIOUS);
+        SPB_intent.setAction(SKIP_PREVIOUS);
         PendingIntent SPB_pendingIntent = PendingIntent.getBroadcast(this, 0, SPB_intent, PendingIntent.FLAG_IMMUTABLE);
 
-//Skip to next song from notification Action Button
+        //Skip to next song from notification Action Button
         Intent SNB_intent = new Intent(this, Receiver.class);
-        SNB_intent.putExtra("SkipPrevious", SKIP_PREVIOUS);
+        SNB_intent.putExtra("SkipNext", SKIP_NEXT);
+        SNB_intent.setAction(SKIP_NEXT);
         PendingIntent SNB_pendingIntent = PendingIntent.getBroadcast(this, 0, SNB_intent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "1")
@@ -56,6 +60,7 @@ public class ExampleService extends Service {
                 .setContentTitle("Music Name")
                 .setContentText("Music description")
                 .setContentIntent(pendingIntent)
+                .setOngoing(false)
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)
                 )
@@ -73,13 +78,18 @@ public class ExampleService extends Service {
         NotificationManagerCompat managerCompat = NotificationManagerCompat.from(this);
         managerCompat.notify(1, builder.build());
         createNotificationChannel(managerCompat);
+
+        startForeground(1, builder.build());
         return super.onStartCommand(intent, flags, startId);
     }
 
     @Override
     public void onDestroy() {
+        stopForeground(false);
+        stopSelf();
         super.onDestroy();
     }
+
 
     public void createNotificationChannel(NotificationManagerCompat managerCompat) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

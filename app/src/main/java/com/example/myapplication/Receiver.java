@@ -23,7 +23,7 @@ public class Receiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getStringExtra("Play/Pause");
+        String action = intent.getAction();
         switch (action) {
             case ExampleService.PLAY_PAUSE:
                 if (player.isPlaying()) {
@@ -38,8 +38,7 @@ public class Receiver extends BroadcastReceiver {
                 break;
             case ExampleService.SKIP_NEXT:
                 if (player.hasNextMediaItem()) {
-                    int indexNext = player.getCurrentMediaItemIndex() + 1;
-                    player.setMediaItem(player.getMediaItemAt(indexNext));
+                    player.seekToNextMediaItem();
                     player.setPlayWhenReady(true);
                     player.getPlaybackState();
                     Log.e("Player: ", "Skip to next song successfully!");
@@ -49,11 +48,12 @@ public class Receiver extends BroadcastReceiver {
                 break;
             case ExampleService.SKIP_PREVIOUS:
                 if (player.hasPreviousMediaItem()) {
-                    int indexPrevious = player.getCurrentMediaItemIndex() - 1;
-                    player.setMediaItem(player.getMediaItemAt(indexPrevious));
+                    player.seekToPreviousMediaItem();
                     player.setPlayWhenReady(true);
                     player.getPlaybackState();
                     Log.e("Player: ", "Skip to next song successfully!");
+                } else {
+                    Log.e("Player: ", "0 previous song!");
                 }
                 break;
         }
