@@ -5,11 +5,14 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+
+import com.google.android.exoplayer2.ExoPlayer;
 
 
 public class ExampleService extends Service {
@@ -17,6 +20,8 @@ public class ExampleService extends Service {
     public static final String PLAY_PAUSE = "play_or_pause";
     public static final String SKIP_PREVIOUS = "skip_to previous";
     public static final String SKIP_NEXT = "skip_to next";
+    public static final String DELETE_NOTIFICATION = "delete_notification";
+    ExoPlayer player;
 
 
     @Override
@@ -24,19 +29,33 @@ public class ExampleService extends Service {
         super.onCreate();
     }
 
+    class LocalBinder extends Binder
+    {
+        ExampleService getService()
+        {
+            return ExampleService.this;
+        }
+
+    }
+
+    private final IBinder binder = new LocalBinder();
+
     @Override
     public IBinder onBind(Intent intent) {
-        return null;
+        return binder;
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        player = MainActivity.getPlayer();
+
         //Start MainActivity on click of notification
         Intent ActivityIntent = new Intent(this, MainActivity.class);
         ActivityIntent.setAction(Intent.ACTION_MAIN);
         ActivityIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, ActivityIntent, PendingIntent.FLAG_IMMUTABLE);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, ActivityIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+
         //Play/Pause song from notification Action Button
         Intent PPB_intent = new Intent(this, Receiver.class);
         PPB_intent.putExtra("Play/Pause", PLAY_PAUSE);
@@ -55,12 +74,18 @@ public class ExampleService extends Service {
         SNB_intent.setAction(SKIP_NEXT);
         PendingIntent SNB_pendingIntent = PendingIntent.getBroadcast(this, 0, SNB_intent, PendingIntent.FLAG_IMMUTABLE);
 
+        //Skip to next song from notification Action Button
+        Intent deleteIntent = new Intent(this, Receiver.class);
+        SNB_intent.putExtra("DeleteNotification", DELETE_NOTIFICATION);
+        SNB_intent.setAction(DELETE_NOTIFICATION);
+        PendingIntent deleteIntent_pendingIntent = PendingIntent.getBroadcast(this, 0, deleteIntent, PendingIntent.FLAG_MUTABLE);
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "1")
                 .setSmallIcon(R.drawable.ic_music_notification)
                 .setContentTitle("Music Name")
                 .setContentText("Music description")
                 .setContentIntent(pendingIntent)
-                .setOngoing(false)
+                /*.setDeleteIntent(deleteIntent_pendingIntent)*/
                 .setStyle(new androidx.media.app.NotificationCompat.MediaStyle()
                         .setShowActionsInCompactView(0, 1, 2)
                 )
@@ -85,9 +110,16 @@ public class ExampleService extends Service {
 
     @Override
     public void onDestroy() {
-        stopForeground(false);
+        player.release();
+        stopForeground(true);
         stopSelf();
         super.onDestroy();
+    }
+
+    @Override
+    public void onTaskRemoved(Intent rootIntent) {
+        player.release();
+        super.onTaskRemoved(rootIntent);
     }
 
 

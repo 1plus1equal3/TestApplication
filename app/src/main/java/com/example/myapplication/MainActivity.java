@@ -19,8 +19,12 @@ import java.io.IOException;
 public class MainActivity extends AppCompatActivity {
 
     Button button, testButton;
-    ExoPlayer player;
+    static ExoPlayer player;
     PlayerControlView playerControlView;
+
+    public static ExoPlayer getPlayer() {
+        return player;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

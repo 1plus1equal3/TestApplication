@@ -3,23 +3,19 @@ package com.example.myapplication;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.google.android.exoplayer2.ExoPlayer;
-import com.google.android.exoplayer2.MediaItem;
 
 public class Receiver extends BroadcastReceiver {
 
     static ExoPlayer player;
-    static MediaItem[] items;
 
     public static void getPlayer(ExoPlayer player) {
         Receiver.player = player;
     }
 
-    public static void getSongPlaylist(MediaItem[] items) {
-        Receiver.items = items;
-    }
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -56,6 +52,15 @@ public class Receiver extends BroadcastReceiver {
                     Log.e("Player: ", "0 previous song!");
                 }
                 break;
+            /*case ExampleService.DELETE_NOTIFICATION:
+                Log.e("123", "123");
+                IBinder binder = peekService(context, new Intent(context, ExampleService.class));
+                if (binder == null)
+                    return;
+                ExampleService service = ((ExampleService.LocalBinder) binder).getService();
+                service.stopForeground(true);
+                service.stopSelf();
+                break;*/
         }
     }
 }

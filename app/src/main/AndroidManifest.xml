@@ -16,11 +16,10 @@
         tools:targetApi="22">
 
         <service android:name=".ExampleService"
+            android:stopWithTask="true"
           />
 
         <receiver android:name=".Receiver">
-
-
         </receiver>
 
         <activity
